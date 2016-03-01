@@ -57,7 +57,7 @@ typedef NS_ENUM(NSInteger, VCCameraState)
 typedef NS_ENUM(NSInteger, VCAspectMode)
 {
     VCAspectModeFit, // 保持画面比例，宽高自适应
-    VCAscpectModeFill // 填满整个视频窗口
+    VCAspectModeFill // 填满整个视频窗口
 };
 
 /** 滤镜类型*/
@@ -68,6 +68,16 @@ typedef NS_ENUM(NSInteger, VCFilter) {
     VCFilterSepia, // 怀旧
     VCFilterFisheye, // 鱼眼
     VCFilterGlow // 发光
+};
+
+/** 视频配置 */
+typedef NS_ENUM(NSInteger, VCVideoQuality) {
+    VCVideoQuality1280x720,
+    VCVideoQuality720x1280,
+    VCVideoQuality640x480,
+    VCVideoQuality480x640,
+    VCVideoQuality480x360,
+    VCVideoQuality360x480
 };
 
 @protocol VCSessionDelegate <NSObject>
@@ -97,11 +107,11 @@ typedef NS_ENUM(NSInteger, VCFilter) {
 @property (nonatomic, assign) int               bitrate;
 /** 视频的帧速率，在推流开始运行后不能修改 */
 @property (nonatomic, assign) int               fps;
-/** 视频的朝向是否以应用的竖直方向为视频的竖直方向，在推流开始运行后不能修改，readonly */
+/** 视频的朝向 YES: 以应用的竖直方向为视频的竖直方向，NO: 以设备的竖直方向为视频的竖直方向。在推流开始运行后不能修改，readonly*/
 @property (nonatomic, assign, readonly) BOOL    useInterfaceOrientation;
 /** 摄像头类型，默认是后置摄像头 VCCameraStateBack */
 @property (nonatomic, assign) VCCameraState cameraState;
-/** 摄像头的视频是否锁定方向，在推流开始运行后不能修改 */
+/** 摄像头的视频是否锁定方向，默认为 NO，在推流开始运行后不能修改 */
 @property (nonatomic, assign) BOOL          orientationLocked;
 /** 是否开启闪光灯，默认不开启 NO */
 @property (nonatomic, assign) BOOL          torch;
@@ -131,7 +141,13 @@ typedef NS_ENUM(NSInteger, VCFilter) {
 @property (nonatomic, assign) VCFilter      filter;
 
 @property (nonatomic, assign) id<VCSessionDelegate> delegate;
-
+#pragma mark - 初始化
+// -----------------------------------------------------------------------------
+/** 
+ 初始化推流Session
+ @param quality 视频大小
+ */
+-(instancetype) initWithQuality:(VCVideoQuality)quality;
 // -----------------------------------------------------------------------------
 /**
  初始化推流Session
@@ -175,7 +191,7 @@ typedef NS_ENUM(NSInteger, VCFilter) {
                        cameraState:(VCCameraState) cameraState;
 
 // -----------------------------------------------------------------------------
-/** 
+/**
  初始化推流Session
  @param videoSize 视频分辨率大小
  @param fps 帧速率
@@ -192,7 +208,7 @@ typedef NS_ENUM(NSInteger, VCFilter) {
                        cameraState:(VCCameraState) cameraState
                         aspectMode:(VCAspectMode) aspectMode;
 
-// -----------------------------------------------------------------------------
+#pragma mark - 接口方法
 /**
  开始推送RTMP流
  @param rtmpUrl 上推地址，rtmp:// 协议
@@ -200,10 +216,13 @@ typedef NS_ENUM(NSInteger, VCFilter) {
  */
 - (void) startRtmpSessionWithURL:(NSString*) rtmpUrl
                     andStreamKey:(NSString*) streamKey;
+/**
+ 开始推送RTMP流
+ @param rtmpUrl 上推地址，rtmp:// 协议
+ */
+- (void) startRtmpSessionWithURL:(NSString *)rtmpUrl;
 /** 结束RTMP流推送 */
 - (void) endRtmpSession;
-/** 获得原始视频画面 */
-- (void) getCameraPreviewLayer: (AVCaptureVideoPreviewLayer**) previewLayer;
 
 /** 
  添加水印

@@ -150,6 +150,8 @@ namespace videocore { namespace simpleApi {
 
 - (void) setupGraph;
 
+/** 获得原始视频画面，不知道怎么用 */
+- (void) getCameraPreviewLayer: (AVCaptureVideoPreviewLayer**) previewLayer;
 @end
 
 @implementation VCSimpleSession
@@ -242,7 +244,7 @@ namespace videocore { namespace simpleApi {
 {
     _aspectMode = aspectMode;
     switch (aspectMode) {
-        case VCAscpectModeFill:
+        case VCAspectModeFill:
             m_aspectMode = videocore::AspectTransform::AspectMode::kAspectFill;
             break;
         case VCAspectModeFit:
@@ -463,7 +465,52 @@ namespace videocore { namespace simpleApi {
     return self;
 }
 
-
+-(instancetype) initWithQuality:(VCVideoQuality)quality
+{
+    if (self = [super init]) {
+        CGSize videoSize;
+        int bit = 0;
+        int frameRate = 30;
+        BOOL userOrientation = NO;
+        switch (quality) {
+            case VCVideoQuality1280x720:
+                bit = 10506240;
+                videoSize = CGSizeMake(1280, 720);
+                break;
+            case VCVideoQuality720x1280:
+                bit = 10506240;
+                videoSize = CGSizeMake(720, 1280);
+                break;
+            case VCVideoQuality640x480:
+                bit = 3502080;
+                videoSize = CGSizeMake(640, 480);
+                break;
+            case VCVideoQuality480x640:
+                bit = 3502080;
+                videoSize = CGSizeMake(480, 640);
+                break;
+            case VCVideoQuality480x360:
+                bit = 700000;
+                videoSize = CGSizeMake(480, 360);
+                break;
+            case VCVideoQuality360x480:
+                bit = 700000;
+                videoSize = CGSizeMake(360, 480);
+                break;
+            default:
+                break;
+        }
+        if (bit > 0) {
+            [self initInternalWithVideoSize:videoSize
+                                  frameRate:frameRate
+                                    bitrate:bit
+                    useInterfaceOrientation:userOrientation
+                                cameraState:VCCameraStateBack
+                                 aspectMode:VCAspectModeFit];
+        }
+    }
+    return self;
+}
 
 - (void) initInternalWithVideoSize:(CGSize)videoSize
                          frameRate:(int)fps
@@ -527,6 +574,12 @@ namespace videocore { namespace simpleApi {
         [bSelf startSessionInternal:rtmpUrl streamKey:streamKey];
     });
 }
+
+- (void) startRtmpSessionWithURL:(NSString *)rtmpUrl
+{
+    [self startRtmpSessionWithURL:rtmpUrl andStreamKey:nil];
+}
+
 - (void) startSessionInternal: (NSString*) rtmpUrl
                     streamKey: (NSString*) streamKey
 {
@@ -585,10 +638,6 @@ namespace videocore { namespace simpleApi {
                                               auto video = std::dynamic_pointer_cast<videocore::IEncoder>( bSelf->m_h264Encoder );
                                               auto audio = std::dynamic_pointer_cast<videocore::IEncoder>( bSelf->m_aacEncoder );
                                               if(video && audio && bSelf.useAdaptiveBitrate) {
-
-                                                  if ([bSelf.delegate respondsToSelector:@selector(detectedThroughput:)]) {
-                                                      [bSelf.delegate detectedThroughput:predicted];
-                                                  }
                                                   if ([bSelf.delegate respondsToSelector:@selector(detectedThroughput:videoRate:)]) {
                                                       [bSelf.delegate detectedThroughput:predicted videoRate:video->bitrate()];
                                                   }
