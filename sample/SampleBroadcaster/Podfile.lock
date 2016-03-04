@@ -15,10 +15,12 @@ PODS:
   - boost/shared_ptr-includes (1.51.0)
   - boost/string_algorithms-includes (1.51.0)
   - glm (0.9.4.6)
+  - Reachability (3.2)
   - UriParser-cpp (0.1.3)
   - VideoCore (0.3.2):
     - boost (~> 1.51.0)
     - glm (~> 0.9.4.6)
+    - Reachability
     - UriParser-cpp (~> 0.1.3)
 
 DEPENDENCIES:
@@ -31,7 +33,8 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   boost: 6c5c8d8daef26ac83c1e1c00ad14de62b80161d7
   glm: e22c8d9df10404059b19c2952f9fa44d9a9f3056
+  Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
   UriParser-cpp: cbbe00080ee432ec4833dca863a7fc83adc9b01a
-  VideoCore: ee91bb8b71919ac7a1cbc752b72272fc53a0567f
+  VideoCore: 01964901393405c013f314bb9041f11961263ccf
 
 COCOAPODS: 0.38.2

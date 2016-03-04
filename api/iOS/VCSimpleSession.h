@@ -45,7 +45,6 @@ typedef NS_ENUM(NSInteger, VCSessionState)
     VCSessionStateStarted,
     VCSessionStateEnded,
     VCSessionStateError
-
 };
 /** 摄像头类型：VCCameraStateFront, VCCameraStateBack*/
 typedef NS_ENUM(NSInteger, VCCameraState)
@@ -142,6 +141,16 @@ typedef NS_ENUM(NSInteger, VCVideoQuality) {
 
 @property (nonatomic, assign) id<VCSessionDelegate> delegate;
 #pragma mark - 初始化
+/**
+ 根据当前网络状态和状态栏的朝向自动初始化：
+
+ 当前网络为Wifi条件时，视频为720p，当isPortrait=YES时采用 VCVideoQuality720x1280，NO时采用 VCVideoQuality1280x720；
+
+ 当前为移动网络时，视频为480p，当isPortrait=YES时采用 VCVideoQuality480x640，NO时采用 VCVideoQuality640x480；
+
+ 其他网络状态时，视频为360p，当isPortrait=YES时采用 VCVideoQuality360x480，NO时采用VCVideoQuality480x360.
+*/
+-(id)initWithCurrentStatus;
 // -----------------------------------------------------------------------------
 /** 
  初始化推流Session

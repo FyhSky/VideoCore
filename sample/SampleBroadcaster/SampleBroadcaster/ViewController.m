@@ -71,14 +71,14 @@
 }
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.pushUrl = @"rtmp://123.125.23.170/leehigh/lee";
+    self.pushUrl = @"rtmp://xxxxx";
 }
 
 -(void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
     if (!self.session) {
-        self.session = [[VCSimpleSession alloc] initWithQuality:VCVideoQuality720x1280];
+        self.session = [[VCSimpleSession alloc] initWithCurrentStatus];
         self.session.delegate = self;
         self.session.previewView.frame = CGRectMake(0, 0, self.session.videoSize.width, self.session.videoSize.height);
         self.videosizeLabel.text = [NSString stringWithFormat:@"%.2f x %.2f", self.session.videoSize.width, self.session.videoSize.height];
@@ -126,4 +126,13 @@
     });
 }
 
+- (UIInterfaceOrientation)preferredInterfaceOrientationForPresentation
+{
+    return UIInterfaceOrientationLandscapeLeft;
+}
+
+- (UIInterfaceOrientationMask)supportedInterfaceOrientations
+{
+    return UIInterfaceOrientationMaskLandscapeLeft | UIInterfaceOrientationMaskLandscapeRight;
+}
 @end

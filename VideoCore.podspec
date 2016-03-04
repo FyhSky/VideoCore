@@ -7,14 +7,14 @@ Pod::Spec.new do |s|
                           intention of being an audio and video manipulation
                           and streaming pipeline for iOS.
                           DESC
-  s.homepage            = "https://github.com/jgh-/VideoCore"
+  s.homepage            = "https://github.com/leyleo/VideoCore"
   s.license             = 'MIT'
-  s.authors             = { "James Hurley" => "jamesghurley@gmail.com" }
-  s.source              = { :git => "https://github.com/jgh-/VideoCore.git", :tag => s.version.to_s }
+  s.authors             = { "leyleo" => "liuley@163.com" }
+  s.source              = { :git => "https://github.com/leyleo/VideoCore.git"}
 
   s.requires_arc        = false
 
-  s.header_dir          = 'videocore'
+  s.header_dir          = 'VideoCore'
   s.header_mappings_dir = '.'
 
   s.source_files        = [ 'mixers/**/*.h*', 'mixers/**/*.cpp', 'mixers/**/*.m*', 
@@ -27,13 +27,14 @@ Pod::Spec.new do |s|
                             'filters/**/*.cpp', 'filters/**/*.h*' ]
 
   s.frameworks          = [ 'VideoToolbox', 'AudioToolbox', 'AVFoundation', 'CFNetwork', 'CoreMedia',
-                            'CoreVideo', 'OpenGLES', 'Foundation', 'CoreGraphics' ]
+                            'CoreVideo', 'OpenGLES', 'Foundation', 'CoreGraphics','SystemConfiguration' ]
 
   s.libraries           = 'c++'
 
   s.dependency          'boost', '~> 1.51.0'
   s.dependency          'glm', '~> 0.9.4.6'
   s.dependency          'UriParser-cpp', '~> 0.1.3'
+  s.dependency          'Reachability'
 
   s.xcconfig            = { "HEADER_SEARCH_PATHS" => "${PODS_ROOT}/boost" }
 

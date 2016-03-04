@@ -33,6 +33,8 @@
 #include <videocore/transforms/AspectTransform.h>
 #include <videocore/transforms/PositionTransform.h>
 
+#import "Reachability.h"
+
 #ifdef __APPLE__
 #   include <videocore/mixers/Apple/AudioMixer.h>
 #   include <videocore/transforms/Apple/MP4Multiplexer.h>
@@ -147,6 +149,18 @@ namespace videocore { namespace simpleApi {
     VCFilter _filter;
 }
 @property (nonatomic, readwrite) VCSessionState rtmpSessionState;
+/**
+ 根据当前网络状态自动初始化：
+ 
+ 当前网络为Wifi条件时，视频为720p，当isPortrait=YES时采用 VCVideoQuality720x1280，NO时采用 VCVideoQuality1280x720；
+ 
+ 当前为移动网络时，视频为480p，当isPortrait=YES时采用 VCVideoQuality480x640，NO时采用 VCVideoQuality640x480；
+ 
+ 其他网络状态时，视频为360p，当isPortrait=YES时采用 VCVideoQuality360x480，NO时采用VCVideoQuality480x360.
+ 
+ @param isPortrait 屏幕宽高是否设置为竖屏方向
+ */
+-(id)initWithCurrentNet:(BOOL)isPortrait;
 
 - (void) setupGraph;
 
@@ -468,48 +482,78 @@ namespace videocore { namespace simpleApi {
 -(instancetype) initWithQuality:(VCVideoQuality)quality
 {
     if (self = [super init]) {
-        CGSize videoSize;
-        int bit = 0;
-        int frameRate = 30;
-        BOOL userOrientation = NO;
-        switch (quality) {
-            case VCVideoQuality1280x720:
-                bit = 10506240;
-                videoSize = CGSizeMake(1280, 720);
-                break;
-            case VCVideoQuality720x1280:
-                bit = 10506240;
-                videoSize = CGSizeMake(720, 1280);
-                break;
-            case VCVideoQuality640x480:
-                bit = 3502080;
-                videoSize = CGSizeMake(640, 480);
-                break;
-            case VCVideoQuality480x640:
-                bit = 3502080;
-                videoSize = CGSizeMake(480, 640);
-                break;
-            case VCVideoQuality480x360:
-                bit = 700000;
-                videoSize = CGSizeMake(480, 360);
-                break;
-            case VCVideoQuality360x480:
-                bit = 700000;
-                videoSize = CGSizeMake(360, 480);
-                break;
-            default:
-                break;
-        }
-        if (bit > 0) {
-            [self initInternalWithVideoSize:videoSize
-                                  frameRate:frameRate
-                                    bitrate:bit
-                    useInterfaceOrientation:userOrientation
-                                cameraState:VCCameraStateBack
-                                 aspectMode:VCAspectModeFit];
-        }
+        [self initInternalWithQuality:quality];
     }
     return self;
+}
+
+-(id)initWithCurrentStatus
+{
+    UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
+    BOOL isPortrait = UIInterfaceOrientationIsPortrait(orientation);
+    return [self initWithCurrentNet:isPortrait];
+}
+
+-(id)initWithCurrentNet:(BOOL)isPortrait
+{
+    self = [super init];
+    if (self) {
+        NetworkStatus status = [self currentStatus];
+        if (status == ReachableViaWiFi) {
+             isPortrait ? [self initInternalWithQuality:VCVideoQuality720x1280]:[self initInternalWithQuality:VCVideoQuality1280x720];
+        } else if (status == ReachableViaWWAN) {
+             isPortrait ? [self initInternalWithQuality:VCVideoQuality640x480]:[self initInternalWithQuality:VCVideoQuality640x480];
+        } else {
+             isPortrait ? [self initInternalWithQuality:VCVideoQuality480x360]:[self initInternalWithQuality:VCVideoQuality480x360];
+        }
+        _useInterfaceOrientation = YES;
+        _orientationLocked = YES;
+    }
+    return self;
+}
+
+-(void) initInternalWithQuality:(VCVideoQuality)quality
+{
+    CGSize videoSize;
+    int bit = 0;
+    int frameRate = 30;
+    BOOL userOrientation = NO;
+    switch (quality) {
+        case VCVideoQuality1280x720:
+            bit = 10506240;
+            videoSize = CGSizeMake(1280, 720);
+            break;
+        case VCVideoQuality720x1280:
+            bit = 10506240;
+            videoSize = CGSizeMake(720, 1280);
+            break;
+        case VCVideoQuality640x480:
+            bit = 3502080;
+            videoSize = CGSizeMake(640, 480);
+            break;
+        case VCVideoQuality480x640:
+            bit = 3502080;
+            videoSize = CGSizeMake(480, 640);
+            break;
+        case VCVideoQuality480x360:
+            bit = 700000;
+            videoSize = CGSizeMake(480, 360);
+            break;
+        case VCVideoQuality360x480:
+            bit = 700000;
+            videoSize = CGSizeMake(360, 480);
+            break;
+        default:
+            break;
+    }
+    if (bit > 0) {
+        [self initInternalWithVideoSize:videoSize
+                              frameRate:frameRate
+                                bitrate:bit
+                useInterfaceOrientation:userOrientation
+                            cameraState:VCCameraStateBack
+                             aspectMode:VCAspectModeFit];
+    }
 }
 
 - (void) initInternalWithVideoSize:(CGSize)videoSize
@@ -752,7 +796,21 @@ namespace videocore { namespace simpleApi {
 //  Private Methods
 // -----------------------------------------------------------------------------
 #pragma mark - Private Methods
-
+-(NetworkStatus)currentStatus
+{
+    NSLog(@"current status: %ld",[[Reachability reachabilityForLocalWiFi] currentReachabilityStatus]);
+    return [[Reachability reachabilityForLocalWiFi] currentReachabilityStatus];
+}
+-(BOOL)isWifi
+{
+    NSLog(@"iswifi: %ld",[[Reachability reachabilityForLocalWiFi] currentReachabilityStatus]);
+    return ([[Reachability reachabilityForLocalWiFi] currentReachabilityStatus] != NotReachable);
+}
+-(BOOL)isNet
+{
+    NSLog(@"iswifi: %ld",[[Reachability reachabilityForInternetConnection] currentReachabilityStatus]);
+    return ([[Reachability reachabilityForInternetConnection] currentReachabilityStatus] != NotReachable);
+}
 
 - (void) setupGraph
 {

@@ -14,16 +14,81 @@ pod 'VideoCore', :git=> 'https://github.com/leyleo/VideoCore.git'
 #### 方法二：使用lib库文件
 Todo
 
-### API说明
+### Quick Start
+*  引入头文件
+
+```
+#import "VCSimpleSession.h"
+```
+*  初始化
+
+```
+self.session = [[VCSimpleSession alloc] initWithCurrentStatus]; // 基于当前网络状况和设备朝向自动初始化
+self.session.delegate = self; // 设置代理VCSessionDelegate，用于监听推流连接状态
+self.session.previewView.frame = CGRectMake(0, 0, self.session.videoSize.width, self.session.videoSize.height);
+[self.view addSubview:self.session.previewView]; // 添加预览视图
+```
+*  开始推流
+
+```
+self.pushUrl = @"rtmp://xxxxx";
+[self.session startRtmpSessionWithURL:self.pushUrl];
+```
+* 结束推流
+
+```
+[self.session endRtmpSession];
+```
+* 监听连接状态
+
+需要添加`VCSessionDelegate`
+
+```
+- (void) connectionStatusChanged: (VCSessionState) sessionState
+{
+    switch(sessionState) {
+        case VCSessionStateStarting:
+        case VCSessionStateStarted:
+        case VCSessionStatePreviewStarted:
+        case VCSessionStateEnded:
+        case VCSessionStateError:
+        case VCSessionStateNone:
+    }
+}
+```
+* 切换摄像头
+
+```
+self.session.cameraState = VCCameraStateFront;
+self.session.cameraState = VCCameraStateBack;
+```
+* 添加滤镜效果
+
+```
+[self.session setFilter: VCFilterNormal];
+[self.session setFilter: VCFilterGray];
+[self.session setFilter: VCFilterInvertColors];
+...
+```
+## 详细API说明
 `VCSimpleSession`类完成了音视频采集，并通过RTMP协议上推到服务端的功能。
 #### 初始化
-有五种初始化方法，用来设置视频的分辨率、相关品质及其他相关参数：
-
+有六种初始化方法，用来设置视频的分辨率、相关品质及其他相关参数：
 
 ```
 方法一：
 /** 
- 初始化推流Session，推荐该种使用方式，默认配置了不同分辨率下的品质。
+ 根据当前网络状态和状态栏的朝向自动初始化，推荐该种使用方式，默认配置了不同分辨率下的品质：
+ 	当前网络为Wifi条件时，视频为720p，当isPortrait=YES时采用 VCVideoQuality720x1280，NO时采用 VCVideoQuality1280x720；
+ 	当前为移动网络时，视频为480p，当isPortrait=YES时采用 VCVideoQuality480x640，NO时采用 VCVideoQuality640x480；
+ 	其他网络状态时，视频为360p，当isPortrait=YES时采用 VCVideoQuality360x480，NO时采用VCVideoQuality480x360.
+ */
+-(id)initWithCurrentStatus;
+```
+```
+方法二：
+/** 
+ 初始化推流Session，默认配置了不同分辨率下的品质。
  @param quality 视频大小，包括以下几个选项
 	VCVideoQuality1280x720,
 	VCVideoQuality720x1280,
@@ -35,7 +100,7 @@ Todo
 -(instancetype) initWithQuality:(VCVideoQuality)quality;
 ```
 ```
-方法二：
+方法三：
 /**
  初始化推流Session
  @param videoSize 视频分辨率大小
@@ -48,7 +113,7 @@ Todo
                            bitrate:(int)bps;
 ```
 ```
-方法三：
+方法四：
 /**
  初始化推流Session
  @param videoSize 视频分辨率大小
@@ -63,7 +128,7 @@ Todo
            useInterfaceOrientation:(BOOL)useInterfaceOrientation;
 ```
 ```
-方法四：
+方法五：
 /**
  初始化推流Session
  @param videoSize 视频分辨率大小
@@ -80,7 +145,7 @@ Todo
                        cameraState:(VCCameraState) cameraState;
 ```
 ```
-方法五：
+方法六：
 /**
  初始化推流Session
  @param videoSize 视频分辨率大小
