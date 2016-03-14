@@ -502,9 +502,9 @@ namespace videocore { namespace simpleApi {
         if (status == ReachableViaWiFi) {
              isPortrait ? [self initInternalWithQuality:VCVideoQuality720x1280]:[self initInternalWithQuality:VCVideoQuality1280x720];
         } else if (status == ReachableViaWWAN) {
-             isPortrait ? [self initInternalWithQuality:VCVideoQuality640x480]:[self initInternalWithQuality:VCVideoQuality640x480];
+             isPortrait ? [self initInternalWithQuality:VCVideoQuality480x640]:[self initInternalWithQuality:VCVideoQuality640x480];
         } else {
-             isPortrait ? [self initInternalWithQuality:VCVideoQuality480x360]:[self initInternalWithQuality:VCVideoQuality480x360];
+             isPortrait ? [self initInternalWithQuality:VCVideoQuality360x480]:[self initInternalWithQuality:VCVideoQuality480x360];
         }
         _useInterfaceOrientation = YES;
         _orientationLocked = YES;
@@ -529,18 +529,22 @@ namespace videocore { namespace simpleApi {
             break;
         case VCVideoQuality640x480:
             bit = 3502080;
+            frameRate = 15;
             videoSize = CGSizeMake(640, 480);
             break;
         case VCVideoQuality480x640:
             bit = 3502080;
+            frameRate = 15;
             videoSize = CGSizeMake(480, 640);
             break;
         case VCVideoQuality480x360:
             bit = 700000;
+            frameRate = 15;
             videoSize = CGSizeMake(480, 360);
             break;
         case VCVideoQuality360x480:
             bit = 700000;
+            frameRate = 15;
             videoSize = CGSizeMake(360, 480);
             break;
         default:
