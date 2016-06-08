@@ -6,7 +6,7 @@
 
 ```
 platform:ios, '7.0'
-pod 'VideoCore', :git=> 'https://github.com/leyleo/VideoCore.git'
+pod 'VideoCore', :git=> 'https://github.com/sinacloud/VideoCore.git'
 ```
 * 执行`pod install`
 * 打开xcworkspace文件
